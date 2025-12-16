@@ -1,0 +1,12 @@
+SELECT
+    `k`.`CONSTRAINT_NAME` AS `name`,
+    GROUP_CONCAT(`k`.`COLUMN_NAME`) AS `columns`
+FROM `information_schema`.`KEY_COLUMN_USAGE` AS `k`
+INNER JOIN
+    `information_schema`.`TABLE_CONSTRAINTS` AS `t`
+    ON `k`.`CONSTRAINT_SCHEMA` = `t`.`CONSTRAINT_SCHEMA` AND `k`.`TABLE_NAME` = `t`.`TABLE_NAME` AND `k`.`CONSTRAINT_NAME` = `t`.`CONSTRAINT_NAME`
+INNER JOIN
+    `information_schema`.`COLUMNS` AS `c`
+    ON `k`.`CONSTRAINT_SCHEMA` = `c`.`TABLE_SCHEMA` AND `k`.`TABLE_NAME` = `c`.`TABLE_NAME` AND `k`.`COLUMN_NAME` = `c`.`COLUMN_NAME`
+WHERE `k`.`CONSTRAINT_SCHEMA` = 'database' AND `k`.`TABLE_NAME` = 'table' AND `t`.`CONSTRAINT_TYPE` = 'UNIQUE' AND `c`.`EXTRA` != 'STORED GENERATED'
+GROUP BY `k`.`CONSTRAINT_NAME`
