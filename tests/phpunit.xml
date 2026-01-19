@@ -18,6 +18,9 @@
         <testsuite name="Import">
             <directory>../src/Pipeline/Import/MariaDB/Tests/</directory>
         </testsuite>
+        <testsuite name="Ranges">
+            <directory>../src/Pipeline/Import/MariaDB/Ranges/Tests/</directory>
+        </testsuite>
     </testsuites>
     <coverage>
         <report>
@@ -34,6 +37,7 @@
         </include>
         <exclude>
             <directory>../src/Pipeline/Import/MariaDB/Tests/</directory>
+            <directory>../src/Pipeline/Import/MariaDB/Ranges/Tests/</directory>
         </exclude>
     </source>
 </phpunit>
