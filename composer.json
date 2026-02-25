@@ -1,6 +1,6 @@
 {
-  "name": "pipeline-etl/import.mariadb",
-  "description": "Pipeline.Import.MariaDB is a module to import data into a MariaDB/MySQL database",
+  "name": "pipeline-etl/mariadb-import",
+  "description": "A module to import data into a MariaDB/MySQL database",
   "keywords": [ "pipeline-etl", "data import", "ETL" ],
   "homepage": "https://github.com/pipeline-etl/pipeline.import.mariadb",
   "type": "library",
