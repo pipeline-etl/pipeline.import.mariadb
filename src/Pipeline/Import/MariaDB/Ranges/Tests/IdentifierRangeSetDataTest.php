@@ -43,7 +43,7 @@ class IdentifierRangeSetDataTest extends IdentifierRangeTestCase
     ];
 
     /**
-     * Test that set_data() throws an exception if data is empty.
+     * Test that setData() throws an exception if data is empty.
      *
      * @covers \Pipeline\Import\MariaDB\Ranges\IdentifierRange::setData
      */
@@ -62,7 +62,7 @@ class IdentifierRangeSetDataTest extends IdentifierRangeTestCase
     }
 
     /**
-     * Test that set_data() sets filtered data.
+     * Test that setData() sets filtered data.
      *
      * @covers \Pipeline\Import\MariaDB\Ranges\IdentifierRange::setData
      */
@@ -82,7 +82,7 @@ class IdentifierRangeSetDataTest extends IdentifierRangeTestCase
     }
 
     /**
-     * Test that set_data() sets filtered data.
+     * Test that setData() sets filtered data.
      *
      * @covers \Pipeline\Import\MariaDB\Ranges\IdentifierRange::setData
      */
