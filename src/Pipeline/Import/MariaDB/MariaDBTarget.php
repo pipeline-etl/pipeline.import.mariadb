@@ -18,6 +18,7 @@ use Pipeline\Common\Node;
 use Pipeline\Import\ContentRangeInterface;
 use Pipeline\Import\DataDiffCategory;
 use Pipeline\Import\ImportTargetInterface;
+use Pipeline\Import\MariaDB\Ranges\IdentifierRange;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use UnexpectedValueException;
@@ -520,6 +521,12 @@ class MariaDBTarget extends MySQLAccessObject implements ImportTargetInterface
         foreach ($ranges as $range)
         {
             if ($range->isEmpty() === TRUE)
+            {
+                continue;
+            }
+
+            // We already filter by identifier above, don't need to do it again
+            if ($range instanceof IdentifierRange)
             {
                 continue;
             }

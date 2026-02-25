@@ -13,6 +13,7 @@ use Lunr\Gravity\Exceptions\DeadlockException;
 use Lunr\Gravity\Exceptions\QueryException;
 use Lunr\Gravity\Tests\Helpers\DatabaseAccessObjectQueryTestTrait;
 use Pipeline\Import\ContentRangeInterface;
+use Pipeline\Import\MariaDB\Ranges\IdentifierRange;
 
 /**
  * This class contains the tests for the deleteData function of the MariaDBTarget class.
@@ -199,6 +200,72 @@ class MariaDBTargetDeleteDataTest extends MariaDBTargetTestCase
         else
         {
             $expectedFile = TEST_STATICS . '/sql/MariaDBTarget/deleteData_with_range_multiple.sql';
+        }
+
+        $method = $this->getReflectionMethod('deleteData');
+
+        $method->invokeArgs($this->class, [ &$entities, $ranges ]);
+
+        $sql = $this->realBuilder->get_delete_query();
+
+        $this->assertSqlStringEqualsSqlFile($expectedFile, $sql);
+    }
+
+    /**
+     * Test that deleteData() constructs a correct SQL query.
+     *
+     * @param array $entities Non-localized entities
+     *
+     * @dataProvider nonLocalizedEntitiesDataProvider
+     * @covers       Pipeline\Import\MariaDB\MariaDBTarget::deleteData
+     */
+    public function testDeleteDataConstructsCorrectRealQueryWithIdentifierRange(array $entities): void
+    {
+        $this->setReflectionPropertyValue('identifierKeys', [ 'id' ]);
+        $this->setReflectionPropertyValue('table', 'table');
+
+        $range1 = $this->getMockBuilder(IdentifierRange::class)
+                       ->disableOriginalConstructor()
+                       ->getMock();
+
+        $range2 = $this->getMockBuilder(ContentRangeInterface::class)
+                       ->getMock();
+
+        $ranges = [ $range1, $range2 ];
+
+        $this->expectQuerySuccess();
+
+        $this->result->shouldReceive('affected_rows')
+                     ->once()
+                     ->andReturn(0);
+
+        $range1->expects($this->once())
+               ->method('isEmpty')
+               ->willReturn(FALSE);
+
+        $range2->expects($this->once())
+               ->method('isEmpty')
+               ->willReturn(FALSE);
+
+        $range1->expects($this->never())
+               ->method('apply');
+
+        $range2->expects($this->once())
+               ->method('apply')
+               ->willReturnCallback(function () {
+                   $builder = $this->class->getQueryBuilder();
+                   $escaper = $this->class->getQueryEscaper();
+
+                   $builder->where($escaper->column('range2'), $escaper->value('value2'));
+               });
+
+        if (count($entities) === 1)
+        {
+            $expectedFile = TEST_STATICS . '/sql/MariaDBTarget/deleteData_with_identifier_range.sql';
+        }
+        else
+        {
+            $expectedFile = TEST_STATICS . '/sql/MariaDBTarget/deleteData_with_identifier_range_multiple.sql';
         }
 
         $method = $this->getReflectionMethod('deleteData');
