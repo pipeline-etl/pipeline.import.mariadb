@@ -211,7 +211,7 @@ class MariaDBTarget extends MySQLAccessObject implements ImportTargetInterface
 
         $builder = $this->db->get_new_dml_query_builder_object(FALSE);
 
-        $builder->select('`k`.`CONSTRAINT_NAME` AS `name`, GROUP_CONCAT(`k`.`COLUMN_NAME`) AS `columns`')
+        $builder->select('`k`.`CONSTRAINT_NAME` AS `name`, GROUP_CONCAT(`k`.`COLUMN_NAME`) AS `keys`')
                 ->from($this->escaper->table('information_schema.KEY_COLUMN_USAGE', 'k'))
                 ->join($this->escaper->table('information_schema.TABLE_CONSTRAINTS', 't'))
                 ->on($this->escaper->column('k.CONSTRAINT_SCHEMA'), $this->escaper->column('t.CONSTRAINT_SCHEMA'))

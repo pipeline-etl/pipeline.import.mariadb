@@ -1,6 +1,6 @@
 SELECT
     `k`.`CONSTRAINT_NAME` AS `name`,
-    GROUP_CONCAT(`k`.`COLUMN_NAME`) AS `columns`
+    GROUP_CONCAT(`k`.`COLUMN_NAME`) AS `keys`
 FROM `information_schema`.`KEY_COLUMN_USAGE` AS `k`
 INNER JOIN
     `information_schema`.`TABLE_CONSTRAINTS` AS `t`
