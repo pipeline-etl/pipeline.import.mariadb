@@ -247,7 +247,7 @@ class MariaDBTarget extends MySQLAccessObject implements ImportTargetInterface
 
         try
         {
-            /** @var UniqueKey[] $keys */
+            /** @var list<array{name: string, keys: string}> $keys */
             $keys = $this->result_array($result);
         }
         catch (QueryException $e)
@@ -255,6 +255,14 @@ class MariaDBTarget extends MySQLAccessObject implements ImportTargetInterface
             throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
         }
 
+        foreach ($keys as &$set)
+        {
+            $set['keys'] = explode(',', $set['keys']);
+        }
+
+        unset($set);
+
+        /** @var UniqueKey[] $keys */
         return $keys;
     }
 
