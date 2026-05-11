@@ -9,6 +9,7 @@
 
 namespace Pipeline\Import\MariaDB;
 
+use Lunr\Gravity\Exceptions\QueryException;
 use Lunr\Gravity\MySQL\MySQLAccessObject;
 use Lunr\Gravity\MySQL\MySQLConnection;
 use Lunr\Gravity\MySQL\MySQLDMLQueryBuilder;
@@ -17,6 +18,7 @@ use Lunr\Gravity\MySQL\MySQLSimpleDMLQueryBuilder;
 use Pipeline\Common\Node;
 use Pipeline\Import\ContentRangeInterface;
 use Pipeline\Import\DataDiffCategory;
+use Pipeline\Import\Exceptions\DatabaseException;
 use Pipeline\Import\ImportTargetInterface;
 use Pipeline\Import\MariaDB\Ranges\IdentifierRange;
 use Psr\Log\LoggerInterface;
@@ -169,11 +171,18 @@ class MariaDBTarget extends MySQLAccessObject implements ImportTargetInterface
         $query  = 'SHOW COLUMNS FROM ' . $this->table . ' WHERE `Key` = \'PRI\'';
         $result = $this->db->query($query);
 
-        /**
-         * 'Field' will always return a list of valid field names
-         * @var string[] $list
-         */
-        $list = $this->result_column($result, 'Field');
+        try
+        {
+            /**
+             * 'Field' will always return a list of valid field names
+             * @var string[] $list
+             */
+            $list = $this->result_column($result, 'Field');
+        }
+        catch (QueryException $e)
+        {
+            throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
+        }
 
         $this->identifierKeys = $list;
 
@@ -191,11 +200,18 @@ class MariaDBTarget extends MySQLAccessObject implements ImportTargetInterface
 
         $result = $this->db->query('SHOW FULL COLUMNS FROM ' . $this->table . ' WHERE `Comment` = \'TIME_KEY\'');
 
-        /**
-         * 'Field' will always return a list of valid field names
-         * @var string[] $list
-         */
-        $list = $this->result_column($result, 'Field');
+        try
+        {
+            /**
+             * 'Field' will always return a list of valid field names
+             * @var string[] $list
+             */
+            $list = $this->result_column($result, 'Field');
+        }
+        catch (QueryException $e)
+        {
+            throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
+        }
 
         return $list;
     }
@@ -229,8 +245,15 @@ class MariaDBTarget extends MySQLAccessObject implements ImportTargetInterface
 
         $result = $this->db->query($builder->get_select_query());
 
-        /** @var UniqueKey[] $keys */
-        $keys = $this->result_array($result);
+        try
+        {
+            /** @var UniqueKey[] $keys */
+            $keys = $this->result_array($result);
+        }
+        catch (QueryException $e)
+        {
+            throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
+        }
 
         return $keys;
     }
@@ -253,8 +276,15 @@ class MariaDBTarget extends MySQLAccessObject implements ImportTargetInterface
 
         unset($data[DataDiffCategory::New->value], $data[DataDiffCategory::Updated->value]);
 
-        $replaced = $this->replaceData($merged);
-        $deleted  = $this->deleteData($data[DataDiffCategory::Obsolete->value], $ranges);
+        try
+        {
+            $replaced = $this->replaceData($merged);
+            $deleted  = $this->deleteData($data[DataDiffCategory::Obsolete->value], $ranges);
+        }
+        catch (QueryException $e)
+        {
+            throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
+        }
 
         $this->db->end_transaction();
 
@@ -358,9 +388,18 @@ class MariaDBTarget extends MySQLAccessObject implements ImportTargetInterface
 
         $this->builder = $this->db->get_new_dml_query_builder_object(FALSE);
 
-        if (!is_null($fields))
+        try
         {
-            $this->builder->select(implode(',', $this->escapeColumns($fields)));
+            if (!is_null($fields))
+            {
+                $this->builder->select(implode(',', $this->escapeColumns($fields)));
+            }
+        }
+        catch (QueryException $e)
+        {
+            $this->builder = NULL;
+
+            throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
         }
 
         $this->builder->from($this->escaper->table($this->table));
@@ -386,7 +425,14 @@ class MariaDBTarget extends MySQLAccessObject implements ImportTargetInterface
 
         $this->builder = NULL;
 
-        return $this->result_array($query);
+        try
+        {
+            return $this->result_array($query);
+        }
+        catch (QueryException $e)
+        {
+            throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**

@@ -9,8 +9,8 @@
 
 namespace Pipeline\Tests\Import\MariaDB;
 
-use Lunr\Gravity\Exceptions\QueryException;
 use Lunr\Gravity\Tests\Helpers\DatabaseAccessObjectQueryTestTrait;
+use Pipeline\Import\Exceptions\DatabaseException;
 
 /**
  * This class contains the tests for the MariaDBTarget.
@@ -169,7 +169,7 @@ class MariaDBTargetGetTimeKeysTest extends MariaDBTargetTestCase
                      ->method('error')
                      ->with('{query}; failed with error: {error}', $context);
 
-        $this->expectException(QueryException::class);
+        $this->expectException(DatabaseException::class);
         $this->expectExceptionMessage('Database query error!');
 
         $this->class->getTimeKeys();

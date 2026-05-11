@@ -11,6 +11,7 @@ namespace Pipeline\Tests\Import\MariaDB;
 
 use Lunr\Gravity\Tests\Helpers\DatabaseAccessObjectQueryTestTrait;
 use Pipeline\Import\ContentRangeInterface;
+use Pipeline\Import\Exceptions\DatabaseException;
 
 /**
  * This class contains the tests for the MariaDBTarget.
@@ -306,7 +307,51 @@ class MariaDBTargetGetDataTest extends MariaDBTargetTestCase
     {
         $this->setReflectionPropertyValue('table', 'table');
 
-        $this->expectQueryError();
+        $this->db->shouldReceive('get_new_dml_query_builder_object')
+                 ->once()
+                 ->with(FALSE)
+                 ->andReturn($this->realBuilder);
+
+        $this->db->shouldReceive('query')
+                 ->once()
+                 ->andReturn($this->result);
+
+        $this->result->shouldReceive('warnings')
+                     ->once()
+                     ->andReturn(NULL);
+
+        $this->result->shouldReceive('has_failed')
+                     ->once()
+                     ->andReturn(TRUE);
+
+        $this->result->shouldReceive('error_number')
+                     ->once()
+                     ->andReturn(1);
+
+        $this->result->shouldReceive('error_message')
+                     ->twice()
+                     ->andReturn('Error!');
+
+        $this->result->shouldReceive('query')
+                     ->twice()
+                     ->andReturn('QUERY;');
+
+        $this->result->shouldReceive('has_deadlock')
+                     ->zeroOrMoreTimes()
+                     ->andReturn(FALSE);
+
+        $this->result->shouldReceive('has_lock_timeout')
+                     ->zeroOrMoreTimes()
+                     ->andReturn(FALSE);
+
+        $context = [ 'query' => 'QUERY;', 'error' => 'Error!' ];
+
+        $this->logger->expects($this->once())
+                     ->method('error')
+                     ->with('{query}; failed with error: {error}', $context);
+
+        $this->expectException(DatabaseException::class);
+        $this->expectExceptionMessage('Database query error!');
 
         $data = [ 'hello', 'world' ];
 
