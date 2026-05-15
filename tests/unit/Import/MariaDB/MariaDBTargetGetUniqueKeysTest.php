@@ -34,10 +34,7 @@ class MariaDBTargetGetUniqueKeysTest extends MariaDBTargetTestCase
         $content = [
             [
                 'name' => 'key_1',
-                'keys' => [
-                    'column1',
-                    'column2',
-                ],
+                'keys' => 'column1,column2',
             ],
         ];
 
@@ -82,6 +79,13 @@ class MariaDBTargetGetUniqueKeysTest extends MariaDBTargetTestCase
         $content = [
             [
                 'name' => 'key_1',
+                'keys' => 'column1,column2',
+            ],
+        ];
+
+        $expected = [
+            [
+                'name' => 'key_1',
                 'keys' => [
                     'column1',
                     'column2',
@@ -95,7 +99,9 @@ class MariaDBTargetGetUniqueKeysTest extends MariaDBTargetTestCase
                  ->once()
                  ->andReturn('database');
 
-        $this->class->getUniqueKeys();
+        $keys = $this->class->getUniqueKeys();
+
+        $this->assertSame($expected, $keys);
     }
 
     /**
